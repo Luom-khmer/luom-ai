@@ -9,8 +9,7 @@ import { useAuth, useAppControls } from './uiUtils';
 const LoginScreen: React.FC = () => {
     const { login } = useAuth();
     const { t } = useAppControls();
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [apiKey, setApiKey] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -19,12 +18,12 @@ const LoginScreen: React.FC = () => {
         setError(null);
         setIsLoading(true);
 
-        const success = await login(username, password);
+        const success = await login(apiKey);
         if (!success) {
             setError(t('login_error'));
             setIsLoading(false);
         }
-        // On success, the App component will re-render, no need to do anything else here.
+        // On success, the window will reload (handled in AuthProvider), no need to update state here.
     };
 
     return (
@@ -38,7 +37,7 @@ const LoginScreen: React.FC = () => {
             >
                 <form 
                     onSubmit={handleSubmit}
-                    className="modal-content !bg-neutral-900/50"
+                    className="modal-content !bg-neutral-900/50 border border-yellow-400/30"
                 >
                     <div className="text-center mb-6">
                         <h1 className="text-5xl title-font font-bold text-white">LUOM AI</h1>
@@ -47,27 +46,20 @@ const LoginScreen: React.FC = () => {
 
                     <div className="space-y-4">
                         <div>
-                            <label htmlFor="username" className="block text-sm font-medium text-neutral-300 mb-1">{t('login_username')}</label>
+                            <label htmlFor="apiKey" className="block text-sm font-medium text-neutral-300 mb-1">{t('login_apiKey')}</label>
                             <input
-                                id="username"
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                id="apiKey"
+                                type="password"
+                                value={apiKey}
+                                onChange={(e) => setApiKey(e.target.value)}
                                 className="form-input"
+                                placeholder="AIzaSy..."
                                 required
                                 autoFocus
                             />
                         </div>
-                        <div>
-                            <label htmlFor="password"  className="block text-sm font-medium text-neutral-300 mb-1">{t('login_password')}</label>
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="form-input"
-                                required
-                            />
+                         <div className="text-xs text-neutral-400 text-center">
+                            Chưa có khóa? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-yellow-400 hover:underline">Lấy miễn phí tại đây</a>
                         </div>
                     </div>
                     

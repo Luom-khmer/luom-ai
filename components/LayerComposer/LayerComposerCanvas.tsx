@@ -302,7 +302,7 @@ export const LayerComposerCanvas: React.FC<LayerComposerCanvasProps> = ({
             const newLayers = onDuplicateForDrag();
             if (newLayers && newLayers.length > 0) {
                 const updatedInteraction = {
-                    ...currentInteraction,
+                    ...(currentInteraction as Interaction),
                     type: 'move' as const,
                     initialLayers: newLayers.map(l => ({ ...l })),
                     hasActionStarted: true,

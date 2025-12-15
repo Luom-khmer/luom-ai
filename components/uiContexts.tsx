@@ -13,14 +13,11 @@ import {
 import * as db from '../lib/db';
 
 // --- Auth Context ---
-interface Account {
-    username: string;
-    password?: string;
-}
+// Removed Account interface as it's no longer needed
 
 interface LoginSettings {
     enabled: boolean;
-    accounts: Account[];
+    // accounts: Account[]; // Removed
 }
 
 interface AuthContextType {
@@ -28,62 +25,37 @@ interface AuthContextType {
     isLoggedIn: boolean;
     currentUser: string | null;
     isLoading: boolean;
-    login: (username: string, password?: string) => Promise<boolean>;
+    login: (apiKey: string) => Promise<boolean>; // Changed signature
     logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [loginSettings, setLoginSettings] = useState<LoginSettings | null>(null);
+    // We keep loginSettings structure to maintain compatibility with App.tsx logic
+    const [loginSettings] = useState<LoginSettings>({ enabled: true }); 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentUser, setCurrentUser] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const initializeAuth = async () => {
-            const defaultSettingsOnError: LoginSettings = {
-                enabled: true,
-                accounts: [
-                    { username: "aPix", password: "sdvn" },
-                    { username: "guest", password: "123" }
-                ]
-            };
-            
-            const handleEnabledLogin = (settings: LoginSettings) => {
-                const storedUser = sessionStorage.getItem('currentUser');
-                if (storedUser && settings.accounts.some(acc => acc.username === storedUser)) {
-                    setCurrentUser(storedUser);
-                    setIsLoggedIn(true);
-                }
-            };
-
             try {
-                const response = await fetch('/setting-login.json');
-                if (response.ok) {
-                    const settings: LoginSettings = await response.json();
-                    setLoginSettings(settings);
-                    
-                    if (settings.enabled === false) {
-                        // Login is disabled. Bypass the login screen. No user is set.
-                        setIsLoggedIn(true);
-                        setCurrentUser(null);
-                        sessionStorage.removeItem('currentUser');
-                    } else {
-                        // Treat enabled:true or missing enabled property as login required.
-                        handleEnabledLogin(settings);
-                    }
+                // Check if API Key exists in LocalStorage
+                const storedKey = localStorage.getItem('GEMINI_API_KEY');
+                
+                // Also check for legacy "currentUser" just for display, though logic relies on Key now
+                const storedUser = sessionStorage.getItem('currentUser');
+
+                if (storedKey && storedKey.trim().length > 0) {
+                    setIsLoggedIn(true);
+                    setCurrentUser(storedUser || 'User'); 
                 } else {
-                    // File not found. Default to login enabled.
-                    console.warn("setting-login.json not found. Defaulting to login enabled.");
-                    setLoginSettings(defaultSettingsOnError);
-                    handleEnabledLogin(defaultSettingsOnError);
+                    setIsLoggedIn(false);
                 }
             } catch (error) {
-                // On any other error (parsing, network), default to login enabled.
-                console.error("Error processing setting-login.json. Defaulting to login enabled.", error);
-                setLoginSettings(defaultSettingsOnError);
-                handleEnabledLogin(defaultSettingsOnError);
+                console.error("Error initializing auth:", error);
+                setIsLoggedIn(false);
             } finally {
                 setIsLoading(false);
             }
@@ -92,23 +64,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         initializeAuth();
     }, []);
 
-    const login = useCallback(async (username: string, password?: string): Promise<boolean> => {
-        if (!loginSettings) return false;
+    const login = useCallback(async (apiKey: string): Promise<boolean> => {
+        if (!apiKey || apiKey.trim().length === 0) return false;
 
-        const account = loginSettings.accounts.find(acc => acc.username === username);
-        if (account && account.password === password) {
-            setCurrentUser(username);
-            setIsLoggedIn(true);
-            sessionStorage.setItem('currentUser', username);
-            return true;
+        // Basic validation (optional, can be stricter)
+        if (!apiKey.startsWith('AIza')) {
+            toast.error("API Key có vẻ không hợp lệ (thường bắt đầu bằng AIza...)");
+             // We allow it anyway in case format changes, but warn user.
         }
-        return false;
-    }, [loginSettings]);
+
+        localStorage.setItem('GEMINI_API_KEY', apiKey.trim());
+        sessionStorage.setItem('currentUser', 'User');
+        setCurrentUser('User');
+        setIsLoggedIn(true);
+        
+        // Reload to ensure the Gemini Client picks up the new key from LocalStorage
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+        
+        return true;
+    }, []);
 
     const logout = useCallback(() => {
         setCurrentUser(null);
         setIsLoggedIn(false);
+        localStorage.removeItem('GEMINI_API_KEY');
         sessionStorage.removeItem('currentUser');
+        window.location.reload();
     }, []);
 
     const value = { loginSettings, isLoggedIn, currentUser, isLoading, login, logout };

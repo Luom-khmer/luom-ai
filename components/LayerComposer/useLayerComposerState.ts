@@ -463,7 +463,7 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         let nextLayers = [...currentLayers];
         const newSelectedIds: string[] = [];
         let canvasNeedsInit = nextLayers.length === 0 && !currentCanvasInitialized;
-        let canvasSettingsToUpdate = { ...currentCanvasSettings };
+        let canvasSettingsToUpdate = { ...(currentCanvasSettings as CanvasSettings) };
         if (canvasNeedsInit) {
             // User request: Default to infinite canvas in all cases when starting.
             // We set a default canvas size and enable infinite mode,
@@ -548,7 +548,7 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         const layersToDuplicate = [...selectedLayers].reverse(); 
         for(const layerToDup of layersToDuplicate) {
              const newLayer: Layer = {
-                 ...layerToDup,
+                 ...(layerToDup as Layer),
                  id: Math.random().toString(36).substring(2, 9),
                  x: layerToDup.x + 20,
                  y: layerToDup.y + 20
@@ -568,7 +568,7 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         
         [...selectedLayers].reverse().forEach(layerToDup => {
             const newLayer: Layer = {
-                ...layerToDup,
+                ...(layerToDup as Layer),
                 id: Math.random().toString(36).substring(2, 9),
                 x: layerToDup.x,
                 y: layerToDup.y
@@ -950,11 +950,15 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
     const duplicateLayer = useCallback((layerId: string): Layer => {
         beginInteraction(); let newLayers = [...layers]; const layerToDup = layers.find(l => l.id === layerId);
         if (!layerToDup) { console.error("Layer to duplicate not found:", layerId); return { id: '', type: 'image', x:0, y:0, width:0, height:0, rotation: 0, opacity: 100, blendMode: 'source-over', isVisible: true, isLocked: false }; }
+        
+        // Ensure layerToDup is treated as object
+        const sourceLayer = layerToDup!; 
+
         const newLayer: Layer = {
-            ...layerToDup,
+            ...sourceLayer,
             id: Math.random().toString(36).substring(2, 9), 
-            x: layerToDup.x + 20, 
-            y: layerToDup.y + 20 
+            x: sourceLayer.x + 20, 
+            y: sourceLayer.y + 20 
         };
         const originalIndex = layers.findIndex(l => l.id === layerId); newLayers.splice(originalIndex >= 0 ? originalIndex : 0, 0, newLayer);
         setLayers(newLayers); setSelectedLayerIds([newLayer.id]);

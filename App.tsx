@@ -121,19 +121,10 @@ function App() {
     } = useAppControls();
     
     const { imageToEdit, closeImageEditor } = useImageEditor();
-    const { loginSettings, isLoggedIn, isLoading, currentUser } = useAuth();
+    const { isLoggedIn, isLoading, currentUser } = useAuth();
     
-    // NEW: State for API Key Modal and Reset Key Modal
     const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
     const [isResetKeyModalOpen, setIsResetKeyModalOpen] = useState(false);
-    const [isGlobalKeyModalOpen, setIsGlobalKeyModalOpen] = useState(false);
-
-    useEffect(() => {
-        // Check if a valid API Key is available on startup
-        if (!hasValidApiKey()) {
-            setIsGlobalKeyModalOpen(true);
-        }
-    }, []);
 
     // Sync global service config when context changes
     useEffect(() => {
@@ -161,8 +152,7 @@ function App() {
                                isLayerComposerVisible || 
                                !!imageToEdit ||
                                isApiKeyModalOpen ||
-                               isResetKeyModalOpen || 
-                               isGlobalKeyModalOpen;
+                               isResetKeyModalOpen;
 
         if (isAnyModalOpen) {
             document.body.style.overflow = 'hidden';
@@ -174,7 +164,7 @@ function App() {
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [isSearchOpen, isGalleryOpen, isInfoOpen, isHistoryPanelOpen, isImageLayoutModalOpen, isBeforeAfterModalOpen, isAppCoverCreatorModalOpen, isStoryboardingModalVisible, isLayerComposerVisible, imageToEdit, isApiKeyModalOpen, isResetKeyModalOpen, isGlobalKeyModalOpen]);
+    }, [isSearchOpen, isGalleryOpen, isInfoOpen, isHistoryPanelOpen, isImageLayoutModalOpen, isBeforeAfterModalOpen, isAppCoverCreatorModalOpen, isStoryboardingModalVisible, isLayerComposerVisible, imageToEdit, isApiKeyModalOpen, isResetKeyModalOpen]);
 
     const getExportableState = useCallback((appState: any, appId: string): any => {
         const exportableState = JSON.parse(JSON.stringify(appState));
@@ -330,7 +320,8 @@ function App() {
         );
     }
 
-    if (loginSettings?.enabled && !isLoggedIn) {
+    // Always require API Key login if not set
+    if (!isLoggedIn) {
         return <LoginScreen />;
     }
 
@@ -486,10 +477,6 @@ function App() {
                 isOpen={isResetKeyModalOpen}
                 onClose={() => setIsResetKeyModalOpen(false)}
                 onConfirm={confirmSwitchToV2}
-            />
-             <GlobalApiKeyModal
-                isOpen={isGlobalKeyModalOpen}
-                onClose={() => setIsGlobalKeyModalOpen(false)}
             />
             <Footer />
         </main>
