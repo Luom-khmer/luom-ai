@@ -548,11 +548,13 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         const topMostSelectedIndex = layers.findIndex(l => l.id === selectedLayers[0].id);
         const layersToDuplicate = [...selectedLayers].reverse(); 
         for(const layerToDup of layersToDuplicate) {
+            // Explicitly define source as Layer object to fix spread type issue
+             const sourceLayer: Layer = layerToDup;
              const newLayer: Layer = {
-                 ...(layerToDup as Layer),
+                 ...sourceLayer,
                  id: Math.random().toString(36).substring(2, 9),
-                 x: layerToDup.x + 20,
-                 y: layerToDup.y + 20
+                 x: sourceLayer.x + 20,
+                 y: sourceLayer.y + 20
              };
             newLayers.splice(topMostSelectedIndex, 0, newLayer); newSelectedIds.push(newLayer.id);
         }
@@ -568,11 +570,13 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         const topMostLayerInSelection = selectedLayers[0]; const topMostSelectedIndex = layers.findIndex(l => l.id === topMostLayerInSelection.id);
         
         [...selectedLayers].reverse().forEach(layerToDup => {
+             // Explicitly define source as Layer object
+            const sourceLayer: Layer = layerToDup;
             const newLayer: Layer = {
-                ...(layerToDup as Layer),
+                ...sourceLayer,
                 id: Math.random().toString(36).substring(2, 9),
-                x: layerToDup.x,
-                y: layerToDup.y
+                x: sourceLayer.x,
+                y: sourceLayer.y
             };
             newLayersState.splice(topMostSelectedIndex, 0, newLayer); newDuplicatedLayers.unshift(newLayer); newSelectedIds.push(newLayer.id);
         });

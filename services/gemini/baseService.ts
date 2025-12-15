@@ -56,12 +56,28 @@ export function processApiError(error: unknown): Error {
  * @returns An object containing the mime type and data.
  */
 export function parseDataUrl(imageDataUrl: string): { mimeType: string; data: string } {
-    const match = imageDataUrl.match(/^data:(image\/\w+);base64,(.*)$/);
-    if (!match) {
-        throw new Error("Invalid image data URL format. Expected 'data:image/...;base64,...'");
+    // Split by the comma separator. The format is "data:[<mediatype>][;base64],<data>"
+    const parts = imageDataUrl.split(',');
+    
+    if (parts.length < 2) {
+        throw new Error("Invalid image data URL format. Missing comma separator.");
     }
-    const [, mimeType, data] = match;
-    return { mimeType, data };
+
+    // The header is everything before the first comma
+    const header = parts[0];
+    const data = parts.slice(1).join(','); // Join back the rest just in case data contained commas (though base64 shouldn't)
+
+    const match = header.match(/^data:(image\/\w+);base64$/);
+    if (!match) {
+        // Fallback for cases where maybe base64 is missing or format is slighty different, but try to extract mimetype
+        const mimeMatch = header.match(/^data:(image\/\w+)/);
+        if (mimeMatch) {
+             return { mimeType: mimeMatch[1], data: data };
+        }
+        throw new Error(`Invalid image data URL header: ${header}`);
+    }
+    
+    return { mimeType: match[1], data: data };
 }
 
 /**

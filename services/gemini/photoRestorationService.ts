@@ -25,61 +25,62 @@ export async function restoreOldPhoto(imageDataUrl: string, options: PhotoRestor
     const imagePart = { inlineData: { mimeType, data: base64Data } };
 
     const promptParts = [
-        'Bạn là một chuyên gia phục chế ảnh cũ. Nhiệm vụ của bạn là phục chế bức ảnh được cung cấp.',
-        '**HƯỚNG DẪN QUAN TRỌNG NHẤT:**'
+        'Bạn là một chuyên gia chỉnh sửa ảnh kỹ thuật số (AI Photo Editor).',
+        'Nhiệm vụ: Cải thiện chất lượng và độ rõ nét của hình ảnh đầu vào (Image Upscaling & Restoration).',
+        '**HƯỚNG DẪN:**'
     ];
     
     // Make colorization the absolute first command if requested.
     if (options.colorizeRgb) {
         promptParts.push(
-            '1. **TÔ MÀU ẢNH (ƯU TIÊN SỐ 1):** Đây là ảnh đen trắng hoặc ảnh màu đã cũ. BẠN BẮT BUỘC PHẢI tô màu lại cho bức ảnh này. Sử dụng một bảng màu đầy đủ, rực rỡ và chân thực. Màu sắc phải trông tự nhiên và sống động như một bức ảnh kỹ thuật số hiện đại. **ĐÂY LÀ YÊU CẦU QUAN TRỌNG NHẤT.**'
+            '1. **TÔ MÀU ẢNH:** Nếu ảnh là đen trắng hoặc phai màu, hãy tô màu lại cho bức ảnh này với màu sắc tự nhiên, sống động và chân thực.'
         );
     } else {
         promptParts.push(
-            '1. **Tô màu (Tự nhiên/Cổ điển):** Nếu ảnh là đen trắng hoặc màu đã phai, hãy tô màu một cách tinh tế. Sử dụng tông màu tự nhiên, phù hợp với thời đại của bức ảnh gốc để giữ lại nét hoài cổ (ví dụ: tông màu sepia nhẹ, màu film cũ).'
+            '1. **Màu sắc:** Giữ nguyên tông màu gốc hoặc điều chỉnh nhẹ nhàng để trông tự nhiên hơn, giữ lại nét hoài cổ.'
         );
     }
 
     if (options.removeStains) {
-        promptParts.push('2. **Sửa chữa triệt để:** Loại bỏ HOÀN TOÀN các vết xước, nếp gấp, vết ố, phai màu, và các hư hỏng vật lý khác.');
+        promptParts.push('2. **Sửa chữa:** Loại bỏ các vết xước, nếp gấp, vết ố, nhiễu hạt (noise) và các hư hỏng vật lý trên ảnh.');
     } else {
-        promptParts.push('2. **Sửa chữa cơ bản:** Sửa các vết rách và nếp gấp lớn, nhưng giữ lại kết cấu và các vết ố nhỏ để duy trì nét cổ điển của ảnh.');
+        promptParts.push('2. **Sửa chữa cơ bản:** Giảm thiểu nhiễu hạt nhưng giữ lại các chi tiết quan trọng.');
     }
 
     promptParts.push(
-        '3. **Tăng cường chi tiết:** Làm sắc nét hình ảnh và khôi phục các chi tiết bị mất, đặc biệt là trên khuôn mặt.',
-        '4. **Giữ nguyên bản chất:** KHÔNG thay đổi các đặc điểm trên khuôn mặt, bố cục, hay nội dung gốc của ảnh.',
+        '3. **Tăng cường chi tiết:** Làm sắc nét hình ảnh (sharpening) và tăng độ phân giải một cách tự nhiên.',
+        '4. **Giữ nguyên bản chất:** KHÔNG thay đổi các đặc điểm nhận dạng trên khuôn mặt người, bố cục, hay nội dung gốc của ảnh. Đây là nhiệm vụ chỉnh sửa ảnh, KHÔNG phải tạo ra người mới.',
         '',
-        '**THÔNG TIN BỔ SUNG ĐỂ CÓ KẾT QUẢ TỐT NHẤT:**'
+        '**THÔNG TIN BỔ SUNG (Context):**'
     );
 
     if (options.type) {
         promptParts.push(`- **Loại ảnh:** ${options.type}.`);
     }
     if (options.gender && options.gender !== 'Tự động') {
-        promptParts.push(`- **Giới tính người trong ảnh:** ${options.gender}.`);
+        promptParts.push(`- **Giới tính:** ${options.gender}.`);
     }
     if (options.age) {
         promptParts.push(`- **Độ tuổi ước tính:** ${options.age}.`);
     }
     if (options.nationality) {
-        promptParts.push(`- **Quốc tịch:** ${options.nationality}. Điều này quan trọng để có màu da và trang phục phù hợp.`);
+        promptParts.push(`- **Quốc tịch:** ${options.nationality}.`);
     }
 
     if (options.notes) {
         promptParts.push(`- **Ghi chú từ người dùng:** "${options.notes}".`);
     }
     if (options.removeWatermark) {
-        promptParts.push('- **Yêu cầu đặc biệt:** Không được có bất kỳ watermark, logo, hay chữ ký nào trên ảnh kết quả.');
+        promptParts.push('- **Yêu cầu đặc biệt:** Loại bỏ watermark, logo, chữ ký nếu có.');
     }
 
-    promptParts.push('', 'Chỉ trả về hình ảnh đã được phục chế, không kèm theo văn bản giải thích.');
+    promptParts.push('', 'Chỉ trả về hình ảnh đã được xử lý.');
 
     const prompt = promptParts.join('\n');
     const textPart = { text: prompt };
 
     try {
-        console.log("Attempting to restore old photo with new stronger prompt...");
+        console.log("Attempting to restore old photo with optimized prompt...");
         const response = await callGeminiWithRetry([imagePart, textPart]);
         return processGeminiResponse(response);
     } catch (error) {
