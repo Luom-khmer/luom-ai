@@ -547,7 +547,11 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         const topMostSelectedIndex = layers.findIndex(l => l.id === selectedLayers[0].id);
         const layersToDuplicate = [...selectedLayers].reverse(); 
         for(const layerToDup of layersToDuplicate) {
-             const newLayer: Layer = { ...(layerToDup as any), id: Math.random().toString(36).substring(2, 9), x: layerToDup.x + 20, y: layerToDup.y + 20 };
+             const newLayer: Layer = Object.assign({}, layerToDup, {
+                 id: Math.random().toString(36).substring(2, 9),
+                 x: layerToDup.x + 20,
+                 y: layerToDup.y + 20
+             });
             newLayers.splice(topMostSelectedIndex, 0, newLayer); newSelectedIds.push(newLayer.id);
         }
         setLayers(newLayers); const newHistory = history.slice(0, historyIndex + 1); newHistory.push(newLayers);
