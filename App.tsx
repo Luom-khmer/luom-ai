@@ -58,7 +58,7 @@ const ImageInterpolation = lazy(() => import('./components/ImageInterpolation'))
 
 
 const AppLoadingFallback = () => (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center min-h-[50vh]">
         <LoadingSpinnerIcon className="animate-spin h-10 w-10 text-yellow-400" />
     </div>
 );
@@ -125,6 +125,14 @@ function App() {
     
     const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
     const [isResetKeyModalOpen, setIsResetKeyModalOpen] = useState(false);
+    const [isGlobalKeyModalOpen, setIsGlobalKeyModalOpen] = useState(false);
+
+    useEffect(() => {
+        // Check if a valid API Key is available on startup
+        if (!hasValidApiKey()) {
+            setIsGlobalKeyModalOpen(true);
+        }
+    }, []);
 
     // Sync global service config when context changes
     useEffect(() => {
@@ -152,7 +160,8 @@ function App() {
                                isLayerComposerVisible || 
                                !!imageToEdit ||
                                isApiKeyModalOpen ||
-                               isResetKeyModalOpen;
+                               isResetKeyModalOpen ||
+                               isGlobalKeyModalOpen;
 
         if (isAnyModalOpen) {
             document.body.style.overflow = 'hidden';
@@ -164,7 +173,7 @@ function App() {
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [isSearchOpen, isGalleryOpen, isInfoOpen, isHistoryPanelOpen, isImageLayoutModalOpen, isBeforeAfterModalOpen, isAppCoverCreatorModalOpen, isStoryboardingModalVisible, isLayerComposerVisible, imageToEdit, isApiKeyModalOpen, isResetKeyModalOpen]);
+    }, [isSearchOpen, isGalleryOpen, isInfoOpen, isHistoryPanelOpen, isImageLayoutModalOpen, isBeforeAfterModalOpen, isAppCoverCreatorModalOpen, isStoryboardingModalVisible, isLayerComposerVisible, imageToEdit, isApiKeyModalOpen, isResetKeyModalOpen, isGlobalKeyModalOpen]);
 
     const getExportableState = useCallback((appState: any, appId: string): any => {
         const exportableState = JSON.parse(JSON.stringify(appState));
@@ -256,7 +265,7 @@ function App() {
     };
 
     const renderContent = () => {
-        if (!settings) return null; // Wait for settings to load
+        if (!settings) return <AppLoadingFallback />; // Wait for settings to load
 
         const commonProps = { 
             addImagesToGallery,
@@ -477,6 +486,10 @@ function App() {
                 isOpen={isResetKeyModalOpen}
                 onClose={() => setIsResetKeyModalOpen(false)}
                 onConfirm={confirmSwitchToV2}
+            />
+             <GlobalApiKeyModal
+                isOpen={isGlobalKeyModalOpen}
+                onClose={() => setIsGlobalKeyModalOpen(false)}
             />
             <Footer />
         </main>
