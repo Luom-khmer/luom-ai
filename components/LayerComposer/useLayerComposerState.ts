@@ -351,7 +351,8 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
 
     const updateLayerProperties = (id: string, newProps: Partial<Layer>, isFinalChange: boolean) => {
         setLayers(prevLayers => {
-            const newLayers = prevLayers.map(l => id === l.id ? { ...l, ...newProps } : l);
+            // FIX: Ensure newProps is spread as an object to avoid spread-on-null errors
+            const newLayers = prevLayers.map(l => id === l.id ? { ...l, ...(newProps || {}) } : l);
              if (isFinalChange) {
                 const newHistory = history.slice(0, historyIndex + 1);
                 if (interactionStartHistoryState.current && JSON.stringify(interactionStartHistoryState.current) !== JSON.stringify(newLayers)) {

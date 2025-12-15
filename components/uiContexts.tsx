@@ -12,12 +12,251 @@ import {
 } from './uiTypes';
 import * as db from '../lib/db';
 
+// --- Default Settings Fallback ---
+// Used if setting.json fails to load
+const DEFAULT_SETTINGS: Settings = {
+  "enableWebcam": false,
+  "enableImageMetadata": false,
+  "home": {
+    "mainTitleKey": "home_mainTitle",
+    "subtitleKey": "home_subtitle",
+    "useSmartTitleWrapping": false,
+    "smartTitleWrapWords": 2
+  },
+  "apps": [
+    {
+      "id": "free-generation",
+      "titleKey": "app_free-generation_title",
+      "descriptionKey": "app_free-generation_description",
+      "icon": "🚀",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/free-gen-1.jpg"
+    },
+    {
+      "id": "image-interpolation",
+      "titleKey": "app_image-interpolation_title",
+      "descriptionKey": "app_image-interpolation_description",
+      "icon": "⚗️",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/noi-suy.jpg"
+    },
+    {
+      "id": "architecture-ideator",
+      "titleKey": "app_architecture-ideator_title",
+      "descriptionKey": "app_architecture-ideator_description",
+      "icon": "🏛️",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/kientruc-2.jpeg"
+    },
+    {
+      "id": "dress-the-model",
+      "titleKey": "app_dress-the-model_title",
+      "descriptionKey": "app_dress-the-model_description",
+      "icon": "👗",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/thoitrang.jpg"
+    },
+    {
+      "id": "photo-restoration",
+      "titleKey": "app_photo-restoration_title",
+      "descriptionKey": "app_photo-restoration_description",
+      "icon": "🖼️",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/phuc-che.jpg"
+    },
+    {
+      "id": "swap-style",
+      "titleKey": "app_swap-style_title",
+      "descriptionKey": "app_swap-style_description",
+      "icon": "🎨",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/swap-style-1.jpg"
+    },
+    {
+      "id": "baby-photo-creator",
+      "titleKey": "app_baby-photo-creator_title",
+      "descriptionKey": "app_baby-photo-creator_description",
+      "icon": "👶",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/baby.jpeg"
+    },
+    {
+      "id": "avatar-creator",
+      "titleKey": "app_avatar-creator_title",
+      "descriptionKey": "app_avatar-creator_description",
+      "icon": "🇻🇳",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/yeu-nuoc.jpeg"
+    },
+    {
+      "id": "beauty-creator",
+      "titleKey": "app_beauty-creator_title",
+      "descriptionKey": "app_beauty-creator_description",
+      "icon": "💄",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/beauty.jpeg"
+    },
+    {
+      "id": "entrepreneur-creator",
+      "titleKey": "app_entrepreneur-creator_title",
+      "descriptionKey": "app_entrepreneur-creator_description",
+      "icon": "💼",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/doanhnhan.jpeg"
+    },
+    {
+      "id": "toy-model-creator",
+      "titleKey": "app_toy-model-creator_title",
+      "descriptionKey": "app_toy-model-creator_description",
+      "icon": "🤖",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/figure.jpeg"
+    },
+    {
+      "id": "mid-autumn-creator",
+      "titleKey": "app_mid-autumn-creator_title",
+      "descriptionKey": "app_mid-autumn-creator_description",
+      "icon": "🌕",
+      "supportsCanvasPreset": true,
+      "previewImageUrl": "https://trainlora.vn/wp-content/uploads/2025/10/trungthu.jpeg"
+    }
+  ],
+  "avatarCreator": {
+    "mainTitleKey": "avatarCreator_mainTitle",
+    "subtitleKey": "avatarCreator_subtitle",
+    "minIdeas": 1,
+    "maxIdeas": 6,
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionKey": "avatarCreator_uploaderCaption",
+    "uploaderDescriptionKey": "avatarCreator_uploaderDescription",
+    "uploaderCaptionStyleKey": "common_uploaderCaptionStyle",
+    "uploaderDescriptionStyleKey": "common_uploaderDescriptionStyle"
+  },
+  "babyPhotoCreator": {
+    "mainTitleKey": "babyPhotoCreator_mainTitle",
+    "subtitleKey": "babyPhotoCreator_subtitle",
+    "minIdeas": 1,
+    "maxIdeas": 6,
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionKey": "babyPhotoCreator_uploaderCaption",
+    "uploaderDescriptionKey": "babyPhotoCreator_uploaderDescription",
+    "uploaderCaptionStyleKey": "common_uploaderCaptionStyle",
+    "uploaderDescriptionStyleKey": "common_uploaderDescriptionStyle"
+  },
+  "beautyCreator": {
+    "mainTitleKey": "beautyCreator_mainTitle",
+    "subtitleKey": "beautyCreator_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "minIdeas": 1,
+    "maxIdeas": 6,
+    "uploaderCaptionKey": "beautyCreator_uploaderCaption",
+    "uploaderDescriptionKey": "beautyCreator_uploaderDescription",
+    "uploaderCaptionStyleKey": "beautyCreator_uploaderCaptionStyle",
+    "uploaderDescriptionStyleKey": "beautyCreator_uploaderDescriptionStyle"
+  },
+  "midAutumnCreator": {
+    "mainTitleKey": "midAutumnCreator_mainTitle",
+    "subtitleKey": "midAutumnCreator_subtitle",
+    "minIdeas": 1,
+    "maxIdeas": 6,
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionKey": "midAutumnCreator_uploaderCaption",
+    "uploaderDescriptionKey": "midAutumnCreator_uploaderDescription",
+    "uploaderCaptionStyleKey": "common_uploaderCaptionStyle",
+    "uploaderDescriptionStyleKey": "common_uploaderDescriptionStyle"
+  },
+  "entrepreneurCreator": {
+    "mainTitleKey": "entrepreneurCreator_mainTitle",
+    "subtitleKey": "entrepreneurCreator_subtitle",
+    "minIdeas": 1,
+    "maxIdeas": 6,
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionKey": "entrepreneurCreator_uploaderCaption",
+    "uploaderDescriptionKey": "entrepreneurCreator_uploaderDescription",
+    "uploaderCaptionStyleKey": "common_uploaderCaptionStyle",
+    "uploaderDescriptionStyleKey": "common_uploaderDescriptionStyle"
+  },
+  "architectureIdeator": {
+    "mainTitleKey": "architectureIdeator_mainTitle",
+    "subtitleKey": "architectureIdeator_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionKey": "architectureIdeator_uploaderCaption",
+    "uploaderDescriptionKey": "architectureIdeator_uploaderDescription"
+  },
+  "dressTheModel": {
+    "mainTitleKey": "dressTheModel_mainTitle",
+    "subtitleKey": "dressTheModel_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionModelKey": "dressTheModel_uploaderCaptionModel",
+    "uploaderDescriptionModelKey": "dressTheModel_uploaderDescriptionModel",
+    "uploaderCaptionClothingKey": "dressTheModel_uploaderCaptionClothing",
+    "uploaderDescriptionClothingKey": "dressTheModel_uploaderDescriptionClothing"
+  },
+  "photoRestoration": {
+    "mainTitleKey": "photoRestoration_mainTitle",
+    "subtitleKey": "photoRestoration_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionKey": "photoRestoration_uploaderCaption",
+    "uploaderDescriptionKey": "photoRestoration_uploaderDescription"
+  },
+  "swapStyle": {
+    "mainTitleKey": "swapStyle_mainTitle",
+    "subtitleKey": "swapStyle_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 3,
+    "uploaderCaptionContentKey": "swapStyle_uploaderCaptionContent",
+    "uploaderDescriptionContentKey": "swapStyle_uploaderDescriptionContent",
+    "uploaderCaptionStyleKey": "swapStyle_uploaderCaptionStyle",
+    "uploaderDescriptionStyleKey": "swapStyle_uploaderDescriptionStyle"
+  },
+  "freeGeneration": {
+    "mainTitleKey": "freeGeneration_mainTitle",
+    "subtitleKey": "freeGeneration_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaption1Key": "freeGeneration_uploaderCaption1",
+    "uploaderDescription1Key": "freeGeneration_uploaderDescription1",
+    "uploaderCaption2Key": "freeGeneration_uploaderCaption2",
+    "uploaderDescription2Key": "freeGeneration_uploaderDescription2",
+    "uploaderCaption3Key": "freeGeneration_uploaderCaption3",
+    "uploaderDescription3Key": "freeGeneration_uploaderDescription3",
+    "uploaderCaption4Key": "freeGeneration_uploaderCaption4",
+    "uploaderDescription4Key": "freeGeneration_uploaderDescription4"
+  },
+  "toyModelCreator": {
+    "mainTitleKey": "toyModelCreator_mainTitle",
+    "subtitleKey": "toyModelCreator_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 1,
+    "uploaderCaptionKey": "toyModelCreator_uploaderCaption",
+    "uploaderDescriptionKey": "toyModelCreator_uploaderDescription"
+  },
+  "imageInterpolation": {
+    "mainTitleKey": "imageInterpolation_mainTitle",
+    "subtitleKey": "imageInterpolation_subtitle",
+    "useSmartTitleWrapping": true,
+    "smartTitleWrapWords": 2,
+    "uploaderCaptionInputKey": "imageInterpolation_uploaderCaptionInput",
+    "uploaderDescriptionInputKey": "imageInterpolation_uploaderDescriptionInput",
+    "uploaderCaptionOutputKey": "imageInterpolation_uploaderCaptionOutput",
+    "uploaderDescriptionOutputKey": "imageInterpolation_uploaderDescriptionOutput",
+    "uploaderCaptionReferenceKey": "imageInterpolation_uploaderCaptionReference",
+    "uploaderDescriptionReferenceKey": "imageInterpolation_uploaderDescriptionReference"
+  }
+} as any; // Cast to any to avoid strict type checks for missing keys like mixStyle/imageToReal if not used
+
 // --- Auth Context ---
-// Removed Account interface as it's no longer needed
 
 interface LoginSettings {
     enabled: boolean;
-    // accounts: Account[]; // Removed
 }
 
 interface AuthContextType {
@@ -25,14 +264,13 @@ interface AuthContextType {
     isLoggedIn: boolean;
     currentUser: string | null;
     isLoading: boolean;
-    login: (apiKey: string) => Promise<boolean>; // Changed signature
+    login: (apiKey: string) => Promise<boolean>;
     logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // We keep loginSettings structure to maintain compatibility with App.tsx logic
     const [loginSettings] = useState<LoginSettings>({ enabled: true }); 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentUser, setCurrentUser] = useState<string | null>(null);
@@ -41,10 +279,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const initializeAuth = async () => {
             try {
-                // Check if API Key exists in LocalStorage
                 const storedKey = localStorage.getItem('GEMINI_API_KEY');
-                
-                // Also check for legacy "currentUser" just for display, though logic relies on Key now
                 const storedUser = sessionStorage.getItem('currentUser');
 
                 if (storedKey && storedKey.trim().length > 0) {
@@ -67,10 +302,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = useCallback(async (apiKey: string): Promise<boolean> => {
         if (!apiKey || apiKey.trim().length === 0) return false;
 
-        // Basic validation (optional, can be stricter)
         if (!apiKey.startsWith('AIza')) {
             toast.error("API Key có vẻ không hợp lệ (thường bắt đầu bằng AIza...)");
-             // We allow it anyway in case format changes, but warn user.
         }
 
         localStorage.setItem('GEMINI_API_KEY', apiKey.trim());
@@ -78,7 +311,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentUser('User');
         setIsLoggedIn(true);
         
-        // Reload to ensure the Gemini Client picks up the new key from LocalStorage
         setTimeout(() => {
             window.location.reload();
         }, 500);
@@ -231,7 +463,7 @@ export const AppControlProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                         .then(res => {
                             if (!res.ok) {
                                 console.warn(`Could not fetch ${module}.json for ${language}`);
-                                return {}; // Return empty object on failure to not break Promise.all
+                                return {}; 
                             }
                             return res.json();
                         })
@@ -251,7 +483,6 @@ export const AppControlProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         fetchTranslations();
     }, [language]);
     
-    // Effect to initialize DB, migrate, and load data on app start
     useEffect(() => {
         async function loadData() {
             await db.migrateFromLocalStorageToIdb();
@@ -276,7 +507,7 @@ export const AppControlProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }, translations as any);
 
         if (translation === undefined) {
-            console.warn(`Translation key not found: ${key}`);
+            // console.warn(`Translation key not found: ${key}`);
             return key;
         }
 
@@ -300,7 +531,6 @@ export const AppControlProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         await db.addHistoryEntry(newEntry);
         setGenerationHistory(prev => {
             const updatedHistory = [newEntry, ...prev];
-            // Pruning can be done here if desired, but IndexedDB is large
             return updatedHistory;
         });
     }, []);
@@ -353,23 +583,20 @@ export const AppControlProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             try {
                 const response = await fetch('/setting.json');
                  if (!response.ok) {
-                    console.warn('Could not load setting.json, using built-in settings.');
-                    return;
+                    throw new Error("Network response was not ok");
                 }
                 const data = await response.json();
                 setSettings(data);
             } catch (error) {
-                console.error("Failed to fetch or parse setting.json:", error);
+                console.warn("Failed to fetch or parse setting.json, using default settings.", error);
+                setSettings(DEFAULT_SETTINGS);
             }
         };
         fetchSettings();
     }, []);
 
     useEffect(() => {
-        // Dynamically remove all possible theme classes to prevent conflicts
         THEMES.forEach(t => document.body.classList.remove(`theme-${t}`));
-        
-        // Add the current theme class
         document.body.classList.add(`theme-${theme}`);
         localStorage.setItem('app-theme', theme);
     }, [theme]);
@@ -423,7 +650,7 @@ export const AppControlProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const handleStateChange = useCallback((newAppState: AnyAppState) => {
         const current = viewHistory[historyIndex];
         if (JSON.stringify(current.state) === JSON.stringify(newAppState)) {
-            return; // No change
+            return; 
         }
     
         const newHistory = viewHistory.slice(0, historyIndex + 1);
@@ -503,7 +730,7 @@ export const AppControlProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const toggleExtraTools = useCallback(() => setIsExtraToolsOpen(prev => !prev), []);
     const openImageLayoutModal = useCallback(() => {
         setIsImageLayoutModalOpen(true);
-        setIsExtraToolsOpen(false); // Close the tools menu when opening the modal
+        setIsExtraToolsOpen(false); 
     }, []);
     const closeImageLayoutModal = useCallback(() => setIsImageLayoutModalOpen(false), []);
     const openBeforeAfterModal = useCallback(() => {
