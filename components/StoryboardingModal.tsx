@@ -525,6 +525,44 @@ export const StoryboardingModal: React.FC<StoryboardingModalProps> = ({ isOpen, 
         updateScenesAndHistory(newScenes);
     };
 
+    const handleEditImage = (index: number, frameType: 'start' | 'end') => {
+        const scene = scenes[index];
+        const frame = frameType === 'start' ? scene.startFrame : scene.endFrame;
+        if (frame.imageUrl) {
+            openImageEditor(frame.imageUrl, (newUrl) => {
+                const newScenes = [...scenes];
+                if (frameType === 'start') {
+                    newScenes[index].startFrame.imageUrl = newUrl;
+                    newScenes[index].startFrame.imageSource = newUrl;
+                } else {
+                    newScenes[index].endFrame.imageUrl = newUrl;
+                    newScenes[index].endFrame.imageSource = newUrl;
+                }
+                updateScenesAndHistory(newScenes);
+                addImagesToGallery([newUrl]);
+            });
+        }
+    };
+
+    const handlePreviewImage = (index: number, frameType: 'start' | 'end') => {
+        const scene = scenes[index];
+        const url = frameType === 'start' ? scene.startFrame.imageUrl : scene.endFrame.imageUrl;
+        if (url) {
+            const imgIndex = lightboxImages.indexOf(url);
+            if (imgIndex !== -1) {
+                openLightbox(imgIndex);
+            }
+        }
+    };
+
+    const handleDownloadImage = (index: number, frameType: 'start' | 'end') => {
+        const scene = scenes[index];
+        const url = frameType === 'start' ? scene.startFrame.imageUrl : scene.endFrame.imageUrl;
+        if (url) {
+            downloadImage(url, `scene-${scene.scene}-${frameType}`);
+        }
+    };
+
     const handleGallerySelect = (url: string) => {
         if (pickingCustomImageFor) {
             const { index, frameType } = pickingCustomImageFor;
@@ -865,23 +903,9 @@ export const StoryboardingModal: React.FC<StoryboardingModalProps> = ({ isOpen, 
                                     onUploadCustomImage={handleUploadCustomImage}
                                     onClearImage={handleClearImage}
                                     onImageFile={handleImageFile}
-                                    onEditImage={(idx, type) => {
-                                        const url = type === 'start' ? scenes[idx].startFrame.imageUrl : scenes[idx].endFrame.imageUrl;
-                                        if(url) openImageEditor(url, (newUrl) => {
-                                            const newScenes = [...scenes];
-                                            if(type === 'start') newScenes[idx].startFrame.imageUrl = newUrl;
-                                            else newScenes[idx].endFrame.imageUrl = newUrl;
-                                            updateScenesAndHistory(newScenes);
-                                        });
-                                    }}
-                                    onPreviewImage={(idx, type) => {
-                                        const url = type === 'start' ? scenes[idx].startFrame.imageUrl : scenes[idx].endFrame.imageUrl;
-                                        if(url) openLightbox(lightboxImages.indexOf(url));
-                                    }}
-                                    onDownloadImage={(idx, type) => {
-                                         const url = type === 'start' ? scenes[idx].startFrame.imageUrl : scenes[idx].endFrame.imageUrl;
-                                         if(url) downloadImage(url, `scene-${idx+1}-${type}`);
-                                    }}
+                                    onEditImage={handleEditImage}
+                                    onPreviewImage={handlePreviewImage}
+                                    onDownloadImage={handleDownloadImage}
                                     onAddScene={handleAddScene}
                                     onDeleteScene={handleDeleteScene}
                                     onMoveScene={handleMoveScene}

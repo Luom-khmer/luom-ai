@@ -949,7 +949,12 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
     const duplicateLayer = useCallback((layerId: string): Layer => {
         beginInteraction(); let newLayers = [...layers]; const layerToDup = layers.find(l => l.id === layerId);
         if (!layerToDup) { console.error("Layer to duplicate not found:", layerId); return { id: '', type: 'image', x:0, y:0, width:0, height:0, rotation: 0, opacity: 100, blendMode: 'source-over', isVisible: true, isLocked: false }; }
-        const newLayer: Layer = { ...layerToDup, id: Math.random().toString(36).substring(2, 9), x: layerToDup.x + 20, y: layerToDup.y + 20 };
+        // FIX: Avoid spread syntax on layerToDup to prevent potential type errors
+        const newLayer: Layer = Object.assign({}, layerToDup, { 
+            id: Math.random().toString(36).substring(2, 9), 
+            x: layerToDup.x + 20, 
+            y: layerToDup.y + 20 
+        });
         const originalIndex = layers.findIndex(l => l.id === layerId); newLayers.splice(originalIndex >= 0 ? originalIndex : 0, 0, newLayer);
         setLayers(newLayers); setSelectedLayerIds([newLayer.id]);
         const newHistory = history.slice(0, historyIndex + 1); newHistory.push(newLayers); setHistory(newHistory); setHistoryIndex(newHistory.length - 1);
