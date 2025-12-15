@@ -350,7 +350,7 @@ const BeautyCreator: React.FC<BeautyCreatorProps> = (props) => {
         return t('beautyCreator_createButton');
     };
     
-    const hasPartialError = appState.stage === 'results' && Object.values(appState.generatedImages).some(img => img.status === 'error');
+    const hasPartialError = appState.stage === 'results' && Object.values(appState.generatedImages).some((img: any) => img.status === 'error');
     const inputImagesForResults = [];
     if (appState.uploadedImage) inputImagesForResults.push({ url: appState.uploadedImage, caption: t('common_originalImage'), onClick: () => openLightbox(lightboxImages.indexOf(appState.uploadedImage!)) });
     if (appState.styleReferenceImage) inputImagesForResults.push({ url: appState.styleReferenceImage, caption: t('common_referenceImage'), onClick: () => openLightbox(lightboxImages.indexOf(appState.styleReferenceImage!)) });
@@ -439,7 +439,7 @@ const BeautyCreator: React.FC<BeautyCreatorProps> = (props) => {
                         const imageState = appState.generatedImages[idea] as any;
                         const currentImageIndexInLightbox = imageState?.url ? lightboxImages.indexOf(imageState.url) : -1;
                         return ( <motion.div className="w-full md:w-auto flex-shrink-0" key={idea} initial={{ opacity: 0, scale: 0.5, y: 100 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 80, damping: 15, delay: index * 0.15 }} >
-                            <ActionablePolaroidCard type="output" caption={idea === 'Style Reference' ? t('common_result') : idea} status={imageState?.status || 'pending'} mediaUrl={imageState?.url} error={imageState?.error} onClick={!imageState?.error && imageState?.url ? () => openLightbox(currentImageIndexInLightbox) : undefined} onImageChange={handleGeneratedImageChange(idea)} onRegenerate={(prompt) => handleRegenerate(idea, prompt)} onGenerateVideoFromPrompt={(prompt) => imageState?.url && generateVideo(imageState.url, prompt)} regenerationTitle={t('common_regenTitle')} regenerationDescription={t('common_regenDescription')} regenerationPlaceholder={t('beautyCreator_regenPlaceholder')} />
+                            <ActionablePolaroidCard type="output" caption={idea === 'Style Reference' ? t('common_result') : idea} status={imageState?.status || 'pending'} mediaUrl={imageState?.url} error={imageState?.error} onClick={!imageState?.error && imageState?.url ? () => openLightbox(currentImageIndexInLightbox) : undefined} onImageChange={handleGeneratedImageChange(idea)} onRegenerate={(prompt) => handleRegeneration(idea, prompt)} onGenerateVideoFromPrompt={(prompt) => imageState?.url && generateVideo(imageState.url, prompt)} regenerationTitle={t('common_regenTitle')} regenerationDescription={t('common_regenDescription')} regenerationPlaceholder={t('beautyCreator_regenPlaceholder')} />
                         </motion.div> );
                     })}
                     {appState.historicalImages.map(({ url: sourceUrl }) => {
