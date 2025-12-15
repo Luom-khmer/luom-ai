@@ -1,4 +1,3 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -762,7 +761,8 @@ export const useImageEditorState = (
                 height: Math.abs(rectHeight),
             });
         } else if (activeTool === 'pen' && interactionState === 'drawingPen' && currentPenDrag) {
-            setCurrentPenDrag(p => ({ ...p!, current: coords }));
+            // FIX: Safely update state without using spread on potentially null value
+            setCurrentPenDrag(p => (p ? { ...p, current: coords } : null));
         }
     };
 

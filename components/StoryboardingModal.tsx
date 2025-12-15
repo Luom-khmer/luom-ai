@@ -525,44 +525,6 @@ export const StoryboardingModal: React.FC<StoryboardingModalProps> = ({ isOpen, 
         updateScenesAndHistory(newScenes);
     };
 
-    const handleEditImage = (index: number, frameType: 'start' | 'end') => {
-        const scene = scenes[index];
-        const frame = frameType === 'start' ? scene.startFrame : scene.endFrame;
-        if (frame.imageUrl) {
-            openImageEditor(frame.imageUrl, (newUrl) => {
-                const newScenes = [...scenes];
-                if (frameType === 'start') {
-                    newScenes[index].startFrame.imageUrl = newUrl;
-                    newScenes[index].startFrame.imageSource = newUrl;
-                } else {
-                    newScenes[index].endFrame.imageUrl = newUrl;
-                    newScenes[index].endFrame.imageSource = newUrl;
-                }
-                updateScenesAndHistory(newScenes);
-                addImagesToGallery([newUrl]);
-            });
-        }
-    };
-
-    const handlePreviewImage = (index: number, frameType: 'start' | 'end') => {
-        const scene = scenes[index];
-        const url = frameType === 'start' ? scene.startFrame.imageUrl : scene.endFrame.imageUrl;
-        if (url) {
-            const imgIndex = lightboxImages.indexOf(url);
-            if (imgIndex !== -1) {
-                openLightbox(imgIndex);
-            }
-        }
-    };
-
-    const handleDownloadImage = (index: number, frameType: 'start' | 'end') => {
-        const scene = scenes[index];
-        const url = frameType === 'start' ? scene.startFrame.imageUrl : scene.endFrame.imageUrl;
-        if (url) {
-            downloadImage(url, `scene-${scene.scene}-${frameType}`);
-        }
-    };
-
     const handleGallerySelect = (url: string) => {
         if (pickingCustomImageFor) {
             const { index, frameType } = pickingCustomImageFor;
@@ -772,6 +734,44 @@ export const StoryboardingModal: React.FC<StoryboardingModalProps> = ({ isOpen, 
         return imgs;
     }, [scenes]);
 
+    const onEditImage = (index: number, frameType: 'start' | 'end') => {
+        const scene = scenes[index];
+        const frame = frameType === 'start' ? scene.startFrame : scene.endFrame;
+        if (frame.imageUrl) {
+            openImageEditor(frame.imageUrl, (newUrl) => {
+                 const newScenes = [...scenes];
+                 if (frameType === 'start') {
+                    newScenes[index].startFrame.imageUrl = newUrl;
+                    newScenes[index].startFrame.imageSource = newUrl;
+                    newScenes[index].startFrame.status = 'done';
+                 } else {
+                    newScenes[index].endFrame.imageUrl = newUrl;
+                    newScenes[index].endFrame.imageSource = newUrl;
+                    newScenes[index].endFrame.status = 'done';
+                 }
+                 updateScenesAndHistory(newScenes);
+                 addImagesToGallery([newUrl]);
+            });
+        }
+    };
+
+    const onPreviewImage = (index: number, frameType: 'start' | 'end') => {
+        const scene = scenes[index];
+        const frame = frameType === 'start' ? scene.startFrame : scene.endFrame;
+        if (frame.imageUrl) {
+            const imgIndex = lightboxImages.indexOf(frame.imageUrl);
+            if (imgIndex !== -1) openLightbox(imgIndex);
+        }
+    };
+
+    const onDownloadImage = (index: number, frameType: 'start' | 'end') => {
+        const scene = scenes[index];
+        const frame = frameType === 'start' ? scene.startFrame : scene.endFrame;
+        if (frame.imageUrl) {
+            downloadImage(frame.imageUrl, `storyboard-scene-${index + 1}-${frameType}`);
+        }
+    };
+
     return ReactDOM.createPortal(
         <>
             <motion.div className="modal-overlay z-[60]" aria-modal="true" role="dialog" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onHide}>
@@ -903,9 +903,9 @@ export const StoryboardingModal: React.FC<StoryboardingModalProps> = ({ isOpen, 
                                     onUploadCustomImage={handleUploadCustomImage}
                                     onClearImage={handleClearImage}
                                     onImageFile={handleImageFile}
-                                    onEditImage={handleEditImage}
-                                    onPreviewImage={handlePreviewImage}
-                                    onDownloadImage={handleDownloadImage}
+                                    onEditImage={onEditImage}
+                                    onPreviewImage={onPreviewImage}
+                                    onDownloadImage={onDownloadImage}
                                     onAddScene={handleAddScene}
                                     onDeleteScene={handleDeleteScene}
                                     onMoveScene={handleMoveScene}

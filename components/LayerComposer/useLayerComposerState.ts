@@ -547,11 +547,12 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         const topMostSelectedIndex = layers.findIndex(l => l.id === selectedLayers[0].id);
         const layersToDuplicate = [...selectedLayers].reverse(); 
         for(const layerToDup of layersToDuplicate) {
-             const newLayer: Layer = Object.assign({}, layerToDup, {
+             const newLayer: Layer = {
+                 ...layerToDup,
                  id: Math.random().toString(36).substring(2, 9),
                  x: layerToDup.x + 20,
                  y: layerToDup.y + 20
-             });
+             };
             newLayers.splice(topMostSelectedIndex, 0, newLayer); newSelectedIds.push(newLayer.id);
         }
         setLayers(newLayers); const newHistory = history.slice(0, historyIndex + 1); newHistory.push(newLayers);
@@ -566,12 +567,12 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
         const topMostLayerInSelection = selectedLayers[0]; const topMostSelectedIndex = layers.findIndex(l => l.id === topMostLayerInSelection.id);
         
         [...selectedLayers].reverse().forEach(layerToDup => {
-            // FIX: Replaced explicit spread syntax with a safer manual object construction to avoid TS error "Spread types may only be created from object types".
-            const newLayer: Layer = Object.assign({}, layerToDup, {
+            const newLayer: Layer = {
+                ...layerToDup,
                 id: Math.random().toString(36).substring(2, 9),
                 x: layerToDup.x,
                 y: layerToDup.y
-            });
+            };
             newLayersState.splice(topMostSelectedIndex, 0, newLayer); newDuplicatedLayers.unshift(newLayer); newSelectedIds.push(newLayer.id);
         });
         setLayers(newLayersState); setSelectedLayerIds(newSelectedIds);
@@ -949,12 +950,12 @@ export const useLayerComposerState = ({ isOpen, onClose, onHide }: { isOpen: boo
     const duplicateLayer = useCallback((layerId: string): Layer => {
         beginInteraction(); let newLayers = [...layers]; const layerToDup = layers.find(l => l.id === layerId);
         if (!layerToDup) { console.error("Layer to duplicate not found:", layerId); return { id: '', type: 'image', x:0, y:0, width:0, height:0, rotation: 0, opacity: 100, blendMode: 'source-over', isVisible: true, isLocked: false }; }
-        // FIX: Avoid spread syntax on layerToDup to prevent potential type errors
-        const newLayer: Layer = Object.assign({}, layerToDup, { 
+        const newLayer: Layer = {
+            ...layerToDup,
             id: Math.random().toString(36).substring(2, 9), 
             x: layerToDup.x + 20, 
             y: layerToDup.y + 20 
-        });
+        };
         const originalIndex = layers.findIndex(l => l.id === layerId); newLayers.splice(originalIndex >= 0 ? originalIndex : 0, 0, newLayer);
         setLayers(newLayers); setSelectedLayerIds([newLayer.id]);
         const newHistory = history.slice(0, historyIndex + 1); newHistory.push(newLayers); setHistory(newHistory); setHistoryIndex(newHistory.length - 1);

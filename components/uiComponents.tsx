@@ -48,6 +48,74 @@ export const renderSmartlyWrappedTitle = (title: string, enabled: boolean, words
     return title;
 };
 
+// --- Global API Key Modal ---
+interface GlobalApiKeyModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export const GlobalApiKeyModal: React.FC<GlobalApiKeyModalProps> = ({ isOpen, onClose }) => {
+    const [inputValue, setInputValue] = useState('');
+
+    useEffect(() => {
+        const stored = localStorage.getItem('GEMINI_API_KEY');
+        if (stored) setInputValue(stored);
+    }, [isOpen]);
+
+    const handleSave = () => {
+        if (!inputValue.trim()) {
+            toast.error("Vui lòng nhập API Key");
+            return;
+        }
+        localStorage.setItem('GEMINI_API_KEY', inputValue.trim());
+        toast.success("Đã lưu API Key! Đang tải lại...");
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    };
+
+    if (!isOpen) return null;
+
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-neutral-900 border border-yellow-400/30 rounded-xl p-6 max-w-md w-full shadow-2xl"
+            >
+                <h3 className="text-xl font-bold text-yellow-400 mb-2">Cấu hình Gemini API Key</h3>
+                <p className="text-neutral-300 text-sm mb-4">
+                    Ứng dụng chưa tìm thấy API Key mặc định. Vui lòng nhập khóa API cá nhân của bạn để tiếp tục sử dụng.
+                </p>
+                <div className="mb-4">
+                    <label className="block text-xs font-medium text-neutral-400 mb-1">Google Gemini API Key</label>
+                    <input 
+                        type="password" 
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="AIzaSy..."
+                        className="w-full bg-neutral-800 border border-neutral-700 rounded-md p-2 text-white focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                    />
+                    <div className="mt-2 text-xs text-neutral-500">
+                        Chưa có khóa? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-yellow-400 hover:underline">Lấy miễn phí tại đây</a>.
+                        <br/>
+                        Khóa sẽ được lưu trên trình duyệt của bạn.
+                    </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                    <button 
+                        onClick={handleSave}
+                        className="bg-yellow-400 text-black font-bold py-2 px-4 rounded-md hover:bg-yellow-300 transition-colors"
+                    >
+                        Lưu và Khởi động lại
+                    </button>
+                </div>
+            </motion.div>
+        </div>,
+        document.body
+    );
+};
+
 // --- Reusable Modal Component ---
 interface RegenerationModalProps {
     isOpen: boolean;
